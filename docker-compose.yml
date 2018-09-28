@@ -1,0 +1,22 @@
+version: "3"
+
+services:
+  ingress:
+    build: ingress/
+    volumes:
+      - "./ingress:/app"
+    depends_on:
+      - rabbit
+
+
+  rabbit:
+    image: rabbitmq:3.7-management
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+
+  redis:
+    image: redis:5.0-rc-alpine
+
+  postgres:
+    image: postgres:11-alpine
