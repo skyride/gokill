@@ -10,9 +10,11 @@ import time
 
 
 # Initiate rabbitmq connection
-rabbit_conn = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
+rabbit_conn = pika.BlockingConnection(pika.ConnectionParameters(host='rabbit'))
+queue_name = "ingress"
 channel = rabbit_conn.channel()
-channel.queue_declare(queue="ingress_id-hash")
+channel.queue_declare(queue=queue_name)
+print("Connected to RabbitMQ")
 
 
 # Websocket callbacks
@@ -27,10 +29,10 @@ def on_message(ws, message):
         # Publish to internal queue
         channel.basic_publish(
             exchange="",
-            routing_key="ingress_id-hash",
+            routing_key=queue_name,
             body="%i:%s" % (kill_id, kill_hash)
         )
-        print("Published kill to ingress_id-hash:", kill_id, kill_hash)
+        print("Published kill to %s queue:" % queue_name, kill_id, kill_hash)
     except json.decoder.JSONDecodeError:
         print("Error occurred decoding the JSON in a message")
     except KeyError:
@@ -47,7 +49,7 @@ def on_close(ws, error):
 
 def on_open(ws):
     def run(*args):
-        print(args)
+        print("Connected to Zkillboard websocket server, sending killstream listen action")
         ws.send('{"action":"sub", "channel":"killstream"}')
     thread.start_new_thread(run, ())
 
