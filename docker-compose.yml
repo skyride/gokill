@@ -10,6 +10,15 @@ services:
       - rabbit
       - redis
 
+  hydrate:
+    build: .
+    command: "python -m celery worker -A app -Q hydrate_character,hydrate_corporation,hydrate_alliance -c 16"
+    volumes:
+      - ".:/app"
+    depends_on:
+      - rabbit
+      - redis
+
   rabbit:
     image: rabbitmq:3.7-management
     ports:
