@@ -1,1 +1,0 @@
-python ingress.py

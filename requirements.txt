@@ -1,0 +1,7 @@
+celery==4.2.1
+django>=2.1,<2.2
+websocket-client==0.53.0
+redis>=2.10.5
+requests==2.19.1
+ujson==1.35
+psycopg2==2.7.5

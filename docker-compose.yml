@@ -2,13 +2,13 @@ version: "3"
 
 services:
   ingress:
-    build: ingress/
+    build: .
+    command: "python ingress.py"
     volumes:
-      - "./ingress:/app"
+      - ".:/app"
     depends_on:
       - rabbit
-    restart: always
-
+      - redis
 
   rabbit:
     image: rabbitmq:3.7-management
@@ -21,3 +21,7 @@ services:
 
   postgres:
     image: postgres:11-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres

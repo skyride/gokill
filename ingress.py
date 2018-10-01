@@ -1,6 +1,5 @@
 import websocket
 import json
-import pika
 
 try:
     import thread
@@ -8,13 +7,7 @@ except ImportError:
     import _thread as thread
 import time
 
-
-# Initiate rabbitmq connection
-rabbit_conn = pika.BlockingConnection(pika.ConnectionParameters(host='rabbit'))
-queue_name = "ingress"
-channel = rabbit_conn.channel()
-channel.queue_declare(queue=queue_name)
-print("Connected to RabbitMQ")
+from hydration.tasks import parse_killmail
 
 
 # Websocket callbacks
@@ -26,13 +19,8 @@ def on_message(ws, message):
         kill_id = data['killmail_id']
         kill_hash = data['zkb']['hash']
 
-        # Publish to internal queue
-        channel.basic_publish(
-            exchange="",
-            routing_key=queue_name,
-            body="%i:%s" % (kill_id, kill_hash)
-        )
-        print("Published kill to %s queue:" % queue_name, kill_id, kill_hash)
+        parse_killmail.delay(kill_id, kill_hash)
+        print("Queued Killmail Parse", kill_id, kill_hash)
     except json.decoder.JSONDecodeError:
         print("Error occurred decoding the JSON in a message")
     except KeyError:
@@ -55,7 +43,7 @@ def on_open(ws):
 
 
 if __name__ == "__main__":
-    #websocket.enableTrace(True)
+    # Connect websocket
     ws = websocket.WebSocketApp(
         "wss://zkillboard.com:2096",
         on_message=on_message,
