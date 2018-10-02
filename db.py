@@ -1,13 +1,17 @@
+from celery.signals import worker_process_init, worker_process_shutdown
 import psycopg2
+import redis
 
+db_conn = None
+redis_conn = None
 
 class DAO(object):
     """
     Handles database access and provides methods for performing operations
     """
     def __init__(self):
-        self.conn = psycopg2.connect("host='postgres' user='postgres' password='postgres' dbname='postgres'")
-        self.cursor = self.conn.cursor()
+        self.cursor = db_conn.cursor()
+        self.redis = redis_conn
 
 
     def execute(self, *args, **kwargs):
@@ -29,12 +33,28 @@ class DAO(object):
 
 
     def commit(self):
-        return self.conn.commit()
+        return db_conn.commit()
 
 
     def rollback(self):
-        return self.conn.rollback()
+        return db_conn.rollback()
 
 
     def close(self):
-        return self.conn.close()
+        return
+        return db_conn.close()
+
+
+@worker_process_init.connect
+def create_connections(**kwargs):
+    """Creates database connections when workers launch"""
+    global db_conn, redis_conn
+    db_conn = psycopg2.connect("host='postgres' user='postgres' password='postgres' dbname='postgres'")
+    redis_conn = redis.Redis(host="redis")
+
+
+@worker_process_shutdown.connect
+def close_connections(**kwargs):
+    """Closes database connections when workers close"""
+    global db_conn, redis_conn
+    db_conn.close()

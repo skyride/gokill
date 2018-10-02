@@ -1,0 +1,48 @@
+version: "3"
+
+services:
+  parser:
+    build: .
+    command: "python -m celery worker -A app -Q parse_killmail -c 64"
+    volumes:
+      - ".:/app"
+    depends_on:
+      - rabbit
+      - redis
+
+  hydrate:
+    build: .
+    command: "python -m celery worker -A app -Q hydrate_character,hydrate_corporation,hydrate_alliance -c 256"
+    volumes:
+      - ".:/app"
+    depends_on:
+      - rabbit
+      - redis
+
+  rabbit:
+    image: rabbitmq:3.7-management
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    volumes:
+      - rabbit_data:/var/lib/rabbitmq
+
+  redis:
+    image: redis:5.0-rc
+    volumes:
+      - redis_data:/data
+
+  postgres:
+    image: postgres:11
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+
+volumes:
+  pg_data:
+  redis_data:
+  rabbit_data:

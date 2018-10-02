@@ -2,7 +2,7 @@ import esi
 import psycopg2
 
 from app import app
-from db import DAO
+from db import DAO, redis_conn
 from exceptions import (
     KillmailHydrationException,
     CharacterHydrationException,
@@ -30,12 +30,21 @@ def parse_killmail(id, hash):
     characters = set(filter(None, [attacker.get('character_id') for attacker in attackers] + [victim.get('character_id')]))
     corporations = set(filter(None, [attacker.get('corporation_id') for attacker in attackers] + [victim.get('corporation_id')]))
     alliances = set(filter(None, [attacker.get('alliance_id') for attacker in attackers] + [victim.get('alliance_id')]))
+
     for character in characters:
-        hydrate_character.delay(character)
+        if db.redis.get('hydrate:character:%s' % character) is None:
+            hydrate_character.delay(character)
+            db.redis.set('hydrate:character:%s' % character, True, ex=86400)
+
     for corporation in corporations:
-        hydrate_corporation.delay(corporation)
+        if db.redis.get('hydrate:corporation:%s' % corporation) is None:
+            hydrate_corporation.delay(corporation)
+            db.redis.set('hydrate:corporation:%s' % corporation, True, ex=86400*2)
+
     for alliance in alliances:
-        hydrate_alliance.delay(alliance)
+        if db.redis.get('hydrate:alliance:%s' % alliance) is None:
+            hydrate_alliance.delay(alliance)
+            db.redis.set('hydrate:alliance:%s' % alliance, True, ex=86400*7)
 
     # Insert the kill
     try:

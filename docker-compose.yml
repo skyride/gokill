@@ -1,9 +1,9 @@
 version: "3"
 
 services:
-  ingress:
+  parser:
     build: .
-    command: "python ingress.py"
+    command: "python -m celery worker -A app -Q parse_killmail -c 2"
     volumes:
       - ".:/app"
     depends_on:
@@ -12,7 +12,7 @@ services:
 
   hydrate:
     build: .
-    command: "python -m celery worker -A app -Q hydrate_character,hydrate_corporation,hydrate_alliance -c 16"
+    command: "python -m celery worker -A app -Q hydrate_character,hydrate_corporation,hydrate_alliance -c 64"
     volumes:
       - ".:/app"
     depends_on:
@@ -27,6 +27,8 @@ services:
 
   redis:
     image: redis:5.0-rc-alpine
+    ports:
+      - "6379:6379"
 
   postgres:
     image: postgres:11-alpine
