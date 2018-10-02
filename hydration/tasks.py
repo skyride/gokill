@@ -48,6 +48,11 @@ def parse_killmail(id, hash):
 
     # Insert the kill
     try:
+        if victim.get('position') is not None:
+            position = victim['position']
+            position = (position.get('x'), position.get('y'), position.get('z'))
+        else:
+            position = (None, None, None)
         db.execute(
             """
             INSERT INTO killmail (
@@ -66,7 +71,7 @@ def parse_killmail(id, hash):
                 id, hash,
                 victim['ship_type_id'], data['solar_system_id'], data['killmail_time'],
                 victim['damage_taken'],
-                victim['position']['x'], victim['position']['y'], victim['position']['z']
+                *position
             )
         )
     except psycopg2.IntegrityError as ex:

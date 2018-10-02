@@ -58,9 +58,9 @@ class Killmail(models.Model):
 
     damage_taken = models.IntegerField(default=0)
 
-    position_x = models.FloatField()
-    position_y = models.FloatField()
-    position_z = models.FloatField()
+    position_x = models.FloatField(null=True, default=None)
+    position_y = models.FloatField(null=True, default=None)
+    position_z = models.FloatField(null=True, default=None)
 
     class Meta:
         db_table = "killmail"
