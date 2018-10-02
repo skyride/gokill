@@ -3,7 +3,7 @@ version: "3"
 services:
   parser:
     build: .
-    command: "python -m celery worker -A app -Q parse_killmail -c 64"
+    command: "python -m celery worker -A app -Q parse_killmail -c 32"
     volumes:
       - ".:/app"
     depends_on:
@@ -12,7 +12,7 @@ services:
 
   hydrate:
     build: .
-    command: "python -m celery worker -A app -Q hydrate_character,hydrate_corporation,hydrate_alliance -c 256"
+    command: "python -m celery worker -A app -Q hydrate_character,hydrate_corporation,hydrate_alliance -c 40"
     volumes:
       - ".:/app"
     depends_on:
