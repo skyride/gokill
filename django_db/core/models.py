@@ -57,6 +57,8 @@ class Killmail(models.Model):
     posted_date = models.DateTimeField(db_index=True)
 
     damage_taken = models.IntegerField(default=0)
+    involved_count = models.IntegerField(default=1)
+    value = models.DecimalField(max_digits=16, decimal_places=2, default=0, db_index=True)
 
     position_x = models.FloatField(null=True, default=None)
     position_y = models.FloatField(null=True, default=None)
@@ -74,6 +76,7 @@ class Item(models.Model):
     dropped = models.IntegerField(default=0)
     destroyed = models.IntegerField(default=0)
     singleton = models.BooleanField(default=False)
+    value = models.DecimalField(max_digits=16, decimal_places=2, default=0, db_index=True)
 
     class Meta:
         db_table = "item"

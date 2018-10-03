@@ -10,7 +10,8 @@ class DAO(object):
     Handles database access and provides methods for performing operations
     """
     def __init__(self):
-        self.cursor = db_conn.cursor()
+        self.db_conn = psycopg2.connect("host='postgres' user='postgres' password='postgres' dbname='postgres'")
+        self.cursor = self.db_conn.cursor()
         self.redis = redis_conn
 
 
@@ -31,25 +32,27 @@ class DAO(object):
                 values
             )
 
+    def fetchall(self):
+        return self.cursor.fetchall()
+
 
     def commit(self):
-        return db_conn.commit()
+        return self.db_conn.commit()
 
 
     def rollback(self):
-        return db_conn.rollback()
+        return self.db_conn.rollback()
 
 
     def close(self):
-        return
-        return db_conn.close()
+        return self.db_conn.close()
 
 
 @worker_process_init.connect
 def create_connections(**kwargs):
     """Creates database connections when workers launch"""
     global db_conn, redis_conn
-    db_conn = psycopg2.connect("host='postgres' user='postgres' password='postgres' dbname='postgres'")
+    #db_conn = psycopg2.connect("host='postgres' user='postgres' password='postgres' dbname='postgres'")
     redis_conn = redis.Redis(host="redis")
 
 
@@ -57,4 +60,4 @@ def create_connections(**kwargs):
 def close_connections(**kwargs):
     """Closes database connections when workers close"""
     global db_conn, redis_conn
-    db_conn.close()
+    #db_conn.close()
