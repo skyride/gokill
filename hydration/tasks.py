@@ -85,8 +85,8 @@ def parse_killmail(self, id, hash):
 
     # Calculate kill total value
     total_value = sum([
-        prices[victim['ship_type_id']],
-        *[prices[item['item_type_id']] * (item.get('quantity_dropped', 0) + item.get('quantity_destroyed', 0)) for item in victim['items']]
+        prices.get(victim['ship_type_id'], 0),
+        *[prices.get(item['item_type_id'], 0) * (item.get('quantity_dropped', 0) + item.get('quantity_destroyed', 0)) for item in victim['items']]
     ])
 
     # Insert the kill
@@ -131,7 +131,7 @@ def parse_killmail(self, id, hash):
                 item.get('quantity_dropped', 0),
                 item.get('quantity_destroyed', 0),
                 bool(item['singleton']),
-                prices[item['item_type_id']] * (item.get('quantity_dropped', 0) + item.get('quantity_destroyed', 0))
+                prices.get(item['item_type_id'], 0) * (item.get('quantity_dropped', 0) + item.get('quantity_destroyed', 0))
             )
             for item in victim['items']
         ]
