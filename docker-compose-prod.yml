@@ -3,7 +3,7 @@ version: "3"
 services:
   parser:
     build: .
-    command: "python -m celery worker -A app -Q parse_killmail -c 32"
+    command: "python -m celery worker -A app -Q parse_killmail -c 40"
     volumes:
       - ".:/app"
     depends_on:
@@ -13,7 +13,7 @@ services:
 
   hydrate:
     build: .
-    command: "python -m celery worker -A app -Q hydrate_character,hydrate_corporation,hydrate_alliance -c 40"
+    command: "python -m celery worker -A app -Q hydrate_character,hydrate_corporation,hydrate_alliance -c 32"
     volumes:
       - ".:/app"
     depends_on:
@@ -39,6 +39,15 @@ services:
       - POSTGRES_USER=postgres
     volumes:
       - pg_data:/var/lib/postgresql/data
+
+  flower:
+    build: .
+    command: python -m flower -A app --port=5555 --address=0.0.0.0
+    ports:
+      - "5555:5555"
+    depends_on:
+      - parser
+      - hydrate
 
 
 volumes:
