@@ -1,7 +1,7 @@
 from flask import Flask, jsonify
 
 from db import ReadOnlyDAO
-from utils import json_response, id_name_pair
+from utils import json_response, idname_pair
 
 app = Flask(__name__)
 
@@ -89,13 +89,13 @@ def get_kill(killmail_id):
     return json_response({
         "killmail_id": killmail_id,
         "victim": {
-            "ship": id_name_pair(
+            "ship": idname_pair(
                 killmail['ship_type_id'], killmail['ship_type_name'],
-                group=id_name_pair(killmail['ship_group_id'], killmail['ship_group_name'])
+                group=idname_pair(killmail['ship_group_id'], killmail['ship_group_name'])
             ),
-            "character": id_name_pair(killmail['victim_char_id'], killmail['victim_char_name']),
-            "corporation": id_name_pair(killmail['victim_corp_id'], killmail['victim_corp_name']),
-            "alliance": id_name_pair(killmail['victim_alliance_id'], killmail['victim_alliance_name']),
+            "character": idname_pair(killmail['victim_char_id'], killmail['victim_char_name']),
+            "corporation": idname_pair(killmail['victim_corp_id'], killmail['victim_corp_name']),
+            "alliance": idname_pair(killmail['victim_alliance_id'], killmail['victim_alliance_name']),
             "value": killmail['value'],
             "damage_taken": killmail['damage_taken']
         },
@@ -103,15 +103,17 @@ def get_kill(killmail_id):
             {
                 "final_blow": attacker['final_blow'],
                 "damage_done": attacker['damage_done'],
-                "character": id_name_pair(attacker['character_id'], attacker['character_name']),
-                "corporation": id_name_pair(attacker['corporation_id'], attacker['corporation_name']),
-                "alliance": id_name_pair(attacker['alliance_id'], attacker['alliance_name'])
+                "character": idname_pair(attacker['character_id'], attacker['character_name']),
+                "corporation": idname_pair(attacker['corporation_id'], attacker['corporation_name']),
+                "alliance": idname_pair(attacker['alliance_id'], attacker['alliance_name']),
+                "ship": idname_pair(attacker['ship_type_id'], attacker['ship_type_name']),
+                "weapon": idname_pair(attacker['weapon_type_id'], attacker['weapon_type_name'])
             }
             for attacker in attackers
         ],
         "items": [
             {
-                "type": id_name_pair(item['type_id'], item['type_name']),
+                "type": idname_pair(item['type_id'], item['type_name']),
                 "flag": item['flag'],
                 "singleton": item['singleton'],
                 "value": item['value'],
@@ -121,9 +123,9 @@ def get_kill(killmail_id):
             for item in items
         ],
         "location": {
-            "system": id_name_pair(killmail['system_id'], killmail['system_name'], security=killmail['system_security']),
-            "constellation": id_name_pair(killmail['const_id'], killmail['const_name']),
-            "region": id_name_pair(killmail['region_id'], killmail['region_name'])
+            "system": idname_pair(killmail['system_id'], killmail['system_name'], security=killmail['system_security']),
+            "constellation": idname_pair(killmail['const_id'], killmail['const_name']),
+            "region": idname_pair(killmail['region_id'], killmail['region_name'])
         },
         "meta": {
             "killmail_date": killmail['killmail_date'],

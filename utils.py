@@ -17,7 +17,7 @@ def json_response(body, status_code=200, content_type="application/json"):
     )
 
 
-def id_name_pair(id, name, **kwargs):
+def idname_pair(id, name, **kwargs):
     """
     Takes an id/name pair as positional arguments and returns a dict.
     Extra arguments can also be provided
@@ -27,3 +27,10 @@ def id_name_pair(id, name, **kwargs):
         "name": name,
         **kwargs
     }
+
+
+def discard_empty_idname_pairs(obj):
+    """
+    Removes idname pairs with a null id
+    """
+    
