@@ -86,7 +86,7 @@ class Involved(models.Model):
     killmail = models.ForeignKey(Killmail, on_delete=models.CASCADE)
 
     ship_type = models.ForeignKey(Type, null=True, on_delete=models.CASCADE, related_name="involved_ships", db_constraint=False, db_index=True)
-    weapon_type = models.ForeignKey(Type, null=True, on_delete=models.CASCADE, related_name="involved_weapons", db_constraint=False, db_index=True)
+    weapon_type = models.ForeignKey(Type, null=True, on_delete=models.CASCADE, related_name="involved_weapons", db_constraint=False, db_index=False)
     damage_done = models.IntegerField(default=0)
 
     is_attacker = models.BooleanField(default=True)
