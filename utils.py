@@ -27,10 +27,3 @@ def idname_pair(id, name, **kwargs):
         "name": name,
         **kwargs
     }
-
-
-def discard_empty_idname_pairs(obj):
-    """
-    Removes idname pairs with a null id
-    """
-    
