@@ -1,5 +1,6 @@
 from celery.signals import worker_process_init, worker_process_shutdown
 import psycopg2
+from psycopg2.extras import RealDictCursor
 import redis
 
 db_conn = None
@@ -13,6 +14,11 @@ class DAO(object):
         self.db_conn = psycopg2.connect("host='postgres' user='postgres' password='postgres' dbname='postgres'")
         self.cursor = self.db_conn.cursor()
         self.redis = redis_conn
+
+
+    def __exit__(self, type, value, traceback):
+        self.commit()
+        self.close()
 
 
     def execute(self, *args, **kwargs):
@@ -46,6 +52,27 @@ class DAO(object):
 
     def close(self):
         return self.db_conn.close()
+
+
+class ReadOnlyDAO(object):
+    """
+    This version of the DAO does not commit transactions and is intended to be used as
+    a context manager for select queries in the backend only.
+    It uses RealDictCursor so that fetch and fetchall return actual dictionaries instead of tuples
+    """
+    def __enter__(self):
+        self.db_conn = psycopg2.connect("host='postgres' user='postgres' password='postgres' dbname='postgres'")
+        self.cursor = self.db_conn.cursor(cursor_factory=RealDictCursor)
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.db_conn.close()
+
+    def execute(self, *args, **kwargs):
+        return self.cursor.execute(*args, **kwargs)
+
+    def fetchall(self):
+        return self.cursor.fetchall()
 
 
 @worker_process_init.connect
