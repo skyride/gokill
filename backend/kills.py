@@ -1,12 +1,6 @@
-from datetime import datetime, timedelta
-
-from flask import Flask, jsonify
-
+from backend.app import app
 from db import ReadOnlyDAO
-from utils import json_response, idname_pair
-
-
-app = Flask(__name__)
+from utils import idname_pair, json_response
 
 
 @app.route("/kill/<int:killmail_id>")
@@ -147,87 +141,5 @@ def get_killmail(killmail_id):
             "killmail_date": killmail['killmail_date'],
             "posted_date": killmail['posted_date'],
             "hash": killmail['hash']
-        }
-    })
-
-
-@app.route("/corporation/<int:corp_id>")
-def get_corp(corp_id):
-    with ReadOnlyDAO() as db:
-        db.execute(
-            """
-            SELECT
-                corporation.name as corp_name, corporation.ticker as corp_ticker,
-                corporation.members as corp_members, corporation.disbanded as corp_disbanded,
-                alliance.id as alliance_id, alliance.name as alliance_name
-            FROM corporation
-            LEFT JOIN alliance ON alliance.id = corporation.alliance_id
-            WHERE corporation.id = %s
-            """,
-            (corp_id, )
-        )
-        r = db.fetchall()
-        if len(r) < 1:
-            return json_response({}, status_code=404)
-        corp = r[0]
-
-        # Get corp aggregated stats
-        db.execute(
-            """
-            SELECT count(killmail.id) as kills, sum(killmail.value) as isk
-            FROM (
-                SELECT DISTINCT involved.killmail_id
-                FROM involved
-                WHERE involved.corporation_id = %s AND involved.is_attacker = true
-            ) as kill
-            INNER JOIN killmail ON killmail.id = kill.killmail_id
-            """,
-            (corp_id, )
-        )
-        kill_stats = db.fetchall()[0]
-        db.execute(
-            """
-            SELECT count(killmail.id) as kills, sum(killmail.value) as isk
-            FROM (
-                SELECT DISTINCT involved.killmail_id
-                FROM involved
-                WHERE involved.corporation_id = %s AND involved.is_attacker = false
-            ) as kill
-            INNER JOIN killmail ON killmail.id = kill.killmail_id
-            """,
-            (corp_id, )
-        )
-        loss_stats = db.fetchall()[0]
-        db.execute(
-            """
-            SELECT COUNT(DISTINCT involved.character_id) as active_pilots_7d
-            FROM involved
-            INNER JOIN killmail ON killmail.id = involved.killmail_id
-            WHERE 	killmail.killmail_date > %s
-                AND	involved.corporation_id = %s
-            """,
-            (datetime.now() - timedelta(days=7), corp_id)
-        )
-        active_pilots_7d = db.fetchall()[0]['active_pilots_7d']
-        
-        def filter_alliance(alliance):
-            if alliance['id'] is not None:
-                return {"alliance:": alliance}
-            return {}
-
-    return json_response({
-        "id": corp_id,
-        "name": corp['corp_name'],
-        "ticker": corp['corp_ticker'],
-        "members": corp['corp_members'],
-        "disbanded": corp['corp_disbanded'],
-        **filter_alliance({
-            "id": corp['alliance_id'],
-            "name": corp['alliance_name']
-        }),
-        "stats": {
-            "killed": kill_stats,
-            "lost": loss_stats,
-            "active_pilots_7d": active_pilots_7d
         }
     })
