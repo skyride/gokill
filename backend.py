@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 from flask import Flask, jsonify
 
 from db import ReadOnlyDAO
@@ -8,7 +10,7 @@ app = Flask(__name__)
 
 
 @app.route("/kill/<int:killmail_id>")
-def get_kill(killmail_id):
+def get_killmail(killmail_id):
     with ReadOnlyDAO() as db:
         # Fetch the killmail
         db.execute("""
@@ -100,52 +102,132 @@ def get_kill(killmail_id):
         return involved
 
     # Build JSON response and return
-    return json_response(
-        {
-            "killmail_id": killmail_id,
-            "victim": involved_filter({
-                "ship": idname_pair(
-                    killmail['ship_type_id'], killmail['ship_type_name'],
-                    group=idname_pair(killmail['ship_group_id'], killmail['ship_group_name'])
-                ),
-                "character": idname_pair(killmail['victim_char_id'], killmail['victim_char_name']),
-                "corporation": idname_pair(killmail['victim_corp_id'], killmail['victim_corp_name']),
-                "alliance": idname_pair(killmail['victim_alliance_id'], killmail['victim_alliance_name']),
-                "value": killmail['value'],
-                "damage_taken": killmail['damage_taken']
-            }),
-            "attackers": [
-                involved_filter({
-                    "final_blow": attacker['final_blow'],
-                    "damage_done": attacker['damage_done'],
-                    "character": idname_pair(attacker['character_id'], attacker['character_name']),
-                    "corporation": idname_pair(attacker['corporation_id'], attacker['corporation_name']),
-                    "alliance": idname_pair(attacker['alliance_id'], attacker['alliance_name']),
-                    "ship": idname_pair(attacker['ship_type_id'], attacker['ship_type_name']),
-                    "weapon": idname_pair(attacker['weapon_type_id'], attacker['weapon_type_name'])
-                })
-                for attacker in attackers
-            ],
-            "items": [
-                {
-                    "type": idname_pair(item['type_id'], item['type_name']),
-                    "flag": item['flag'],
-                    "singleton": item['singleton'],
-                    "value": item['value'],
-                    "dropped": item['dropped'],
-                    "destroyed": item['destroyed']
-                }
-                for item in items
-            ],
-            "location": {
-                "system": idname_pair(killmail['system_id'], killmail['system_name'], security=killmail['system_security']),
-                "constellation": idname_pair(killmail['const_id'], killmail['const_name']),
-                "region": idname_pair(killmail['region_id'], killmail['region_name'])
-            },
-            "meta": {
-                "killmail_date": killmail['killmail_date'],
-                "posted_date": killmail['posted_date'],
-                "hash": killmail['hash']
+    return json_response({
+        "id": killmail_id,
+        "victim": involved_filter({
+            "ship": idname_pair(
+                killmail['ship_type_id'], killmail['ship_type_name'],
+                group=idname_pair(killmail['ship_group_id'], killmail['ship_group_name'])
+            ),
+            "character": idname_pair(killmail['victim_char_id'], killmail['victim_char_name']),
+            "corporation": idname_pair(killmail['victim_corp_id'], killmail['victim_corp_name']),
+            "alliance": idname_pair(killmail['victim_alliance_id'], killmail['victim_alliance_name']),
+            "value": round(killmail['value'], 2),
+            "damage_taken": killmail['damage_taken']
+        }),
+        "attackers": [
+            involved_filter({
+                "final_blow": attacker['final_blow'],
+                "damage_done": attacker['damage_done'],
+                "character": idname_pair(attacker['character_id'], attacker['character_name']),
+                "corporation": idname_pair(attacker['corporation_id'], attacker['corporation_name']),
+                "alliance": idname_pair(attacker['alliance_id'], attacker['alliance_name']),
+                "ship": idname_pair(attacker['ship_type_id'], attacker['ship_type_name']),
+                "weapon": idname_pair(attacker['weapon_type_id'], attacker['weapon_type_name'])
+            })
+            for attacker in attackers
+        ],
+        "items": [
+            {
+                "type": idname_pair(item['type_id'], item['type_name']),
+                "flag": item['flag'],
+                "singleton": item['singleton'],
+                "value": round(item['value'], 2),
+                "dropped": item['dropped'],
+                "destroyed": item['destroyed']
             }
+            for item in items
+        ],
+        "location": {
+            "system": idname_pair(killmail['system_id'], killmail['system_name'], security=round(killmail['system_security'], 2)),
+            "constellation": idname_pair(killmail['const_id'], killmail['const_name']),
+            "region": idname_pair(killmail['region_id'], killmail['region_name'])
+        },
+        "meta": {
+            "killmail_date": killmail['killmail_date'],
+            "posted_date": killmail['posted_date'],
+            "hash": killmail['hash']
         }
-    )
+    })
+
+
+@app.route("/corporation/<int:corp_id>")
+def get_corp(corp_id):
+    with ReadOnlyDAO() as db:
+        db.execute(
+            """
+            SELECT
+                corporation.name as corp_name, corporation.ticker as corp_ticker,
+                corporation.members as corp_members, corporation.disbanded as corp_disbanded,
+                alliance.id as alliance_id, alliance.name as alliance_name
+            FROM corporation
+            LEFT JOIN alliance ON alliance.id = corporation.alliance_id
+            WHERE corporation.id = %s
+            """,
+            (corp_id, )
+        )
+        r = db.fetchall()
+        if len(r) < 1:
+            return json_response({}, status_code=404)
+        corp = r[0]
+
+        # Get corp aggregated stats
+        db.execute(
+            """
+            SELECT count(killmail.id) as kills, sum(killmail.value) as isk
+            FROM (
+                SELECT DISTINCT involved.killmail_id
+                FROM involved
+                WHERE involved.corporation_id = %s AND involved.is_attacker = true
+            ) as kill
+            INNER JOIN killmail ON killmail.id = kill.killmail_id
+            """,
+            (corp_id, )
+        )
+        kill_stats = db.fetchall()[0]
+        db.execute(
+            """
+            SELECT count(killmail.id) as kills, sum(killmail.value) as isk
+            FROM (
+                SELECT DISTINCT involved.killmail_id
+                FROM involved
+                WHERE involved.corporation_id = %s AND involved.is_attacker = false
+            ) as kill
+            INNER JOIN killmail ON killmail.id = kill.killmail_id
+            """,
+            (corp_id, )
+        )
+        loss_stats = db.fetchall()[0]
+        db.execute(
+            """
+            SELECT COUNT(DISTINCT involved.character_id) as active_pilots_7d
+            FROM involved
+            INNER JOIN killmail ON killmail.id = involved.killmail_id
+            WHERE 	killmail.killmail_date > %s
+                AND	involved.corporation_id = %s
+            """,
+            (datetime.now() - timedelta(days=7), corp_id)
+        )
+        active_pilots_7d = db.fetchall()[0]['active_pilots_7d']
+        
+        def filter_alliance(alliance):
+            if alliance['id'] is not None:
+                return {"alliance:": alliance}
+            return {}
+
+    return json_response({
+        "id": corp_id,
+        "name": corp['corp_name'],
+        "ticker": corp['corp_ticker'],
+        "members": corp['corp_members'],
+        "disbanded": corp['corp_disbanded'],
+        **filter_alliance({
+            "id": corp['alliance_id'],
+            "name": corp['alliance_name']
+        }),
+        "stats": {
+            "killed": kill_stats,
+            "lost": loss_stats,
+            "active_pilots_7d": active_pilots_7d
+        }
+    })
