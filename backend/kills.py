@@ -1,3 +1,5 @@
+from flask import request
+
 from backend.app import app
 from db import ReadOnlyDAO
 from utils import idname_pair, json_response
@@ -143,3 +145,71 @@ def get_killmail(killmail_id):
             "hash": killmail['hash']
         }
     })
+
+
+
+def filter_kills(kills=50, page=1):
+    # Check we have parameters to work with
+    if len(request.form) < 1:
+        return json_response({}, status_code=400)
+
+    with ReadOnlyDAO() as db:
+        # Build join and wheres list
+        join_keys = set()
+        form_keys = set(request.form.keys())
+        wheres = []
+        parameters = dict()
+        if "alliance" in form_keys:
+            join_keys.update(["involved", "alliance"])
+            wheres.append("alliance.id = ANY(%(alliance)s)")
+            parameters['alliance'] = [int(i) for i in request.form.getlist('alliance')]
+        if "corporation" in form_keys:
+            join_keys.update(["involved", "corporation"])
+        if "character" in form_keys:
+            join_keys.update(["involved", "character"])
+        if "system" in form_keys:
+            join_keys.update(["system"])
+        if "constellation" in form_keys:
+            join_keys.update(["system", "constellation"])
+        if "region" in form_keys:
+            join_keys.update(["system", "region"])
+        wheres = " AND ".join(wheres)
+
+        # Implement joins list
+        joins = []
+        if "involved" in join_keys:
+            joins.append("involved ON involved.killmail_id = killmail.id")
+        if "alliance" in join_keys:
+            joins.append("alliance ON alliance.id = involved.alliance_id")
+        if "corporation" in join_keys:
+            joins.append("corporation ON corporation.id = involved.corporation_id")
+        if "character" in join_keys:
+            joins.append("character ON character.id = involved.character_id")
+        if "system" in join_keys:
+            joins.append("system ON system.id = killmail.system_id")
+        if "constellation" in join_keys:
+            joins.append("constellation ON constellation.id = system.constellation_id")
+        if "region" in join_keys:
+            joins.append("region ON region.id = system.region_id")
+        joins = "\n".join([" INNER JOIN %s " % join for join in joins])
+        
+        # Run query
+        db.execute(
+            "SELECT DISTINCT killmail.id, killmail.killmail_date FROM killmail" +\
+            joins + " \n WHERE " +\
+            wheres + " \n " +\
+            """
+            ORDER BY killmail.killmail_date DESC
+            LIMIT %(limit)s OFFSET %(offset)s
+            """,
+            {
+                **parameters,
+                "limit": kills, "offset": kills * page * (page - 1)
+            }
+        )
+        return json_response(db.fetchall())
+
+
+app.route("/kills/filter", methods=["POST"])(filter_kills)
+app.route("/kills/filter/<int:page>", methods=["POST"])(filter_kills)
+app.route("/kills/filter/<int:page>/<int:kills>")(filter_kills)
