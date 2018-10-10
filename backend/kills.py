@@ -151,7 +151,7 @@ def get_killmail(killmail_id):
 def filter_kills(kills=50, page=1):
     # Check we have parameters to work with
     if len(request.form) < 1:
-        return json_response({}, status_code=400)
+        return json_response({"message": "No valid parameters provided"}, status_code=400)
 
     with ReadOnlyDAO() as db:
         # Build join and wheres list
@@ -159,48 +159,95 @@ def filter_kills(kills=50, page=1):
         form_keys = set(request.form.keys())
         wheres = []
         parameters = dict()
-        if "alliance" in form_keys:
-            join_keys.update(["involved", "alliance"])
-            wheres.append("alliance.id = ANY(%(alliance)s)")
-            parameters['alliance'] = [int(i) for i in request.form.getlist('alliance')]
-        if "corporation" in form_keys:
-            join_keys.update(["involved", "corporation"])
-        if "character" in form_keys:
-            join_keys.update(["involved", "character"])
-        if "system" in form_keys:
-            join_keys.update(["system"])
-        if "constellation" in form_keys:
-            join_keys.update(["system", "constellation"])
-        if "region" in form_keys:
-            join_keys.update(["system", "region"])
-        wheres = " AND ".join(wheres)
+        try:
+            # Involved
+            if "alliance" in form_keys:
+                join_keys.update(["involved"])
+                wheres.append("involved.alliance_id = ANY(%(alliance)s)")
+                parameters['alliance'] = [int(i) for i in request.form.getlist('alliance')]
+            if "corporation" in form_keys:
+                join_keys.update(["involved"])
+                wheres.append("involved.corporation_id = ANY(%(corporation)s)")
+                parameters['corporation'] = [int(i) for i in request.form.getlist('corporation')]
+            if "character" in form_keys:
+                join_keys.update(["involved"])
+                wheres.append("involved.character = ANY(%(character)s)")
+                parameters['character'] = [int(i) for i in request.form.getlist('character')]
+
+            # Location
+            if "system" in form_keys:
+                wheres.append("killmail.system_id = ANY(%(system)s)")
+                parameters['system'] = [int(i) for i in request.form.getlist('system')]
+            if "constellation" in form_keys:
+                join_keys.update(["system"])
+                wheres.append("system.constellation_id = ANY(%(constellation)s)")
+                parameters['constellation'] = [int(i) for i in request.form.getlist('constellation')]
+            if "region" in form_keys:
+                join_keys.update(["system"])
+                wheres.append("system.region_id = ANY(%(region)s)")
+                parameters['region'] = [int(i) for i in request.form.getlist('region')]
+
+            # Meta
+            if "value_gte" in form_keys:
+                wheres.append("killmail.value >= %(value_gte)s")
+                parameters['value_gte'] = int(request.form.get('value_gte'))
+            if "value_lte" in form_keys:
+                wheres.append("killmail.value <= %(value_lte)s")
+                parameters['value_lte'] = int(request.form.get('value_lte'))
+            wheres = " AND ".join(wheres)
+
+            if len(parameters) < 1:
+                return json_response({"message": "No valid parameters provided"}, status_code=400)
+        except ValueError:
+            return json_response({"message": "There was an error in the provided filter body"}, status_code=400)
 
         # Implement joins list
         joins = []
         if "involved" in join_keys:
             joins.append("involved ON involved.killmail_id = killmail.id")
-        if "alliance" in join_keys:
-            joins.append("alliance ON alliance.id = involved.alliance_id")
-        if "corporation" in join_keys:
-            joins.append("corporation ON corporation.id = involved.corporation_id")
-        if "character" in join_keys:
-            joins.append("character ON character.id = involved.character_id")
         if "system" in join_keys:
-            joins.append("system ON system.id = killmail.system_id")
-        if "constellation" in join_keys:
-            joins.append("constellation ON constellation.id = system.constellation_id")
-        if "region" in join_keys:
-            joins.append("region ON region.id = system.region_id")
+            joins.append("sde_system as system ON system.id = killmail.system_id")
         joins = "\n".join([" INNER JOIN %s " % join for join in joins])
         
         # Run query
         db.execute(
-            "SELECT DISTINCT killmail.id, killmail.killmail_date FROM killmail" +\
-            joins + " \n WHERE " +\
-            wheres + " \n " +\
             """
-            ORDER BY killmail.killmail_date DESC
-            LIMIT %(limit)s OFFSET %(offset)s
+            SELECT  killmail.id as killmail_id, killmail.killmail_date as killmail_date,
+                    killmail.involved_count as involved_count, killmail.value as value,
+                    system.id as system_id, system.name as system_name,
+                    region.id as region_id, region.name as region_name,
+                    type.id as type_id, type.name as type_name,
+                    victim_character.id as victim_character_id, victim_character.name as victim_character_name,
+                    victim_corporation.id as victim_corporation_id, victim_corporation.name as victim_corporation_name,
+                    victim_corporation.ticker as victim_corporation_ticker,
+                    victim_alliance.id as victim_alliance_id, victim_alliance.name as victim_alliance_name,
+                    victim_alliance.ticker as victim_alliance_ticker,
+                    final_blow_character.id as final_blow_character_id, final_blow_character.name as final_blow_character_name,
+                    final_blow_corporation.id as final_blow_corporation_id, final_blow_corporation.name as final_blow_corporation_name,
+                    final_blow_corporation.ticker as final_blow_corporation_ticker,
+                    final_blow_alliance.id as final_blow_alliance_id, final_blow_alliance.name as final_blow_alliance_name,
+                    final_blow_alliance.ticker as final_blow_alliance_ticker
+            """ +\
+                "FROM (SELECT DISTINCT killmail.id, killmail.killmail_date FROM killmail" +\
+                joins + " \n WHERE " +\
+                wheres + " \n " +\
+                """
+                ORDER BY killmail.killmail_date DESC
+                LIMIT %(limit)s OFFSET %(offset)s) as origin
+                """ +\
+            """
+            INNER JOIN killmail ON killmail.id = origin.id
+            LEFT JOIN sde_system as system ON system.id = killmail.system_id
+            LEFT JOIN sde_region as region ON region.id = system.region_id
+            LEFT JOIN sde_type as type ON type.id = killmail.type_id
+            LEFT JOIN involved as victim ON victim.killmail_id = killmail.id AND victim.is_attacker = false
+            LEFT JOIN character as victim_character ON victim_character.id = victim.character_id
+            LEFT JOIN corporation as victim_corporation ON victim_corporation.id = victim.corporation_id
+            LEFT JOIN alliance as victim_alliance ON victim_alliance.id = victim.alliance_id
+            LEFT JOIN involved as final_blow ON final_blow.killmail_id = killmail.id AND final_blow.final_blow = true
+            LEFT JOIN character as final_blow_character ON final_blow_character.id = final_blow.character_id
+            LEFT JOIN corporation as final_blow_corporation ON final_blow_corporation.id = final_blow.corporation_id
+            LEFT JOIN alliance as final_blow_alliance ON final_blow_alliance.id = final_blow.alliance_id
             """,
             {
                 **parameters,
@@ -212,4 +259,4 @@ def filter_kills(kills=50, page=1):
 
 app.route("/kills/filter", methods=["POST"])(filter_kills)
 app.route("/kills/filter/<int:page>", methods=["POST"])(filter_kills)
-app.route("/kills/filter/<int:page>/<int:kills>")(filter_kills)
+app.route("/kills/filter/<int:page>/<int:kills>", methods=["POST"])(filter_kills)
