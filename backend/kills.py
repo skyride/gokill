@@ -10,7 +10,7 @@ def get_killmail(killmail_id):
     with ReadOnlyDAO() as db:
         # Fetch the killmail
         db.execute("""
-            SELECT 
+            SELECT
                 killmail.id, killmail.hash, killmail.value, killmail.damage_taken,
                 killmail.type_id as ship_type_id, ship_type.name as ship_type_name,
                 ship_group.id as ship_group_id, ship_group.name as ship_group_name,
@@ -171,8 +171,14 @@ def filter_kills(kills=50, page=1):
                 parameters['corporation'] = [int(i) for i in request.form.getlist('corporation')]
             if "character" in form_keys:
                 join_keys.update(["involved"])
-                wheres.append("involved.character = ANY(%(character)s)")
+                wheres.append("involved.character_id = ANY(%(character)s)")
                 parameters['character'] = [int(i) for i in request.form.getlist('character')]
+
+            # Victim
+            if "victim_character" in form_keys:
+                join_keys.update(["victim"])
+                wheres.append("victim.character_id = ANY(%(victim_character)s)")
+                parameters['victim_character'] = [int(i) for i in request.form.getlist('victim_character')]
 
             # Location
             if "system" in form_keys:
@@ -207,8 +213,11 @@ def filter_kills(kills=50, page=1):
             joins.append("involved ON involved.killmail_id = killmail.id")
         if "system" in join_keys:
             joins.append("sde_system as system ON system.id = killmail.system_id")
+        if "victim" in join_keys:
+            joins.append("involved as victim ON victim.killmail_id = killmail.id AND victim.is_attacker = false")
+
         joins = "\n".join([" INNER JOIN %s " % join for join in joins])
-        
+
         # Run query
         db.execute(
             """
