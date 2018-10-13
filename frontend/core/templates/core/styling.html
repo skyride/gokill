@@ -1,0 +1,114 @@
+{% extends "core/base.html" %}
+
+{% block title %}Styling Test{% endblock %}
+
+
+{% block body %}
+<div class="container-fluid ship-bg"></div>
+
+<div class="container">
+    <div class="jumbotron dark-transparent">
+        <h1 class="display-3">A big <i>header</i></h1>
+
+        <h1>Header 1</h1>
+        <h2>Header 2</h2>
+        <h3>Header 3</h3>
+        <h4>Header 4</h4>
+        <h5>Header 5</h5>
+
+        <p class="lead">This is a simple hero unit, a simple jumbotron-style component for calling extra attention to featured content or information.</p>
+        <p>It uses utility classes for typography and spacing to space content out within the larger container.</p>
+        <p class="lead">
+            <a class="btn btn-primary btn-lg" href="#" role="button">Primary</a>
+            <a class="btn btn-dark btn-lg" href="#" role="button">Dark</a>
+            <a class="btn btn-light btn-lg" href="#" role="button">Light</a>
+            <a class="btn btn-info btn-lg" href="#" role="button">Info</a>
+            <a class="btn btn-success btn-lg" href="#" role="button">Success</a>
+            <a class="btn btn-warning btn-lg" href="#" role="button">Warning</a>
+            <a class="btn btn-danger btn-lg" href="#" role="button">Danger</a>
+        </p>
+
+        <div class="row">
+            {% with "3514 42125 671 23773" as ships %}
+                {% for ship in ships.split %}
+                    <div class="col-3">
+                        <div class="card card-killmail border-dark" style="background-image: url('https://imageserver.eveonline.com/Render/{{ ship }}_512.png');">
+                            <div class="card-header">
+                                <img class="avatar" src="https://imageserver.eveonline.com/Character/93417038_64.jpg">
+                                <div class="victim-details">
+                                    <strong><a href="#">Capri Sun KraftFoods</a></strong><br />
+                                    <i>Revenant</i>
+                                </div>
+                            </div>
+                            <div class="victim-avatars">
+                                <img class="avatar" src="https://imageserver.eveonline.com/Corporation/98040755_64.png">
+                                <img class="avatar" src="https://imageserver.eveonline.com/Alliance/99005065_64.png">
+                            </div>
+
+                            <div class="killmail-details">
+                                <img class="avatar" src="https://imageserver.eveonline.com/Corporation/98115742_64.png">
+                                <img class="avatar" src="https://imageserver.eveonline.com/Alliance/864733958_64.png">
+                                <ul>
+                                    <li>128.49B ISK</li>
+                                    <li>48 Attackers</li>
+                                </ul>
+                            </div>
+                            <div class="killmail-footer">
+                                <img class="avatar" src="https://imageserver.eveonline.com/Character/94726691_64.jpg">
+                                <div class="final-blow-details">
+                                    <strong>Capri Sun SUPERFOODS</strong><br />
+                                    <i>Revelation</i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endwith %}
+        </div>
+    </div>
+
+    <table class="table table-sm table-borderless table-striped killmail-table">
+        <thead>
+            <tr>
+
+            </tr>
+        </thead>
+        <tbody>
+            {% with "3514 42125 671 23773" as ships %}
+                {% for ship in ships.split %}
+                    <tr>
+                        <td>
+                            00:25<br />
+                            <a href="#">576.53m</a>
+                        </td>
+
+                        <td class="avatar">
+                            <img src="https://imageserver.eveonline.com/Type/12044_64.png">
+                        </td>
+                        <td>
+                            <span class="sec-0-4">0.4</span> <a href="#">Olettiers</a><br />
+                            <a href="#">Sinq Laison</a>
+                        </td>
+
+                        <td class="avatar">
+                            <img class="avatar" src="https://imageserver.eveonline.com/Alliance/99005065_64.png">
+                        </td>
+                        <td>
+                            <a href="#">Capri Sun KraftFoods</a> (<a href="#">Revenant</a>)<br />
+                            <a href="#">Hard Knocks Citizens</a>
+                        </td>
+
+                        <td class="avatar">
+                                <img class="avatar" src="https://imageserver.eveonline.com/Alliance/864733958_64.png">
+                        </td>
+                        <td>
+                            <a href="#">Capri Sun SUPERFOODS</a> (<a href="#">Revelation</a>)<br />
+                            <a href="#">Psychotic Tendencies.</a> (48)
+                        </td>
+                    </tr>
+                {% endfor %}
+            {% endwith %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

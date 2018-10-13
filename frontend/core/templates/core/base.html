@@ -1,0 +1,29 @@
+{% load sass_tags staticfiles %}
+
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta name="description" content="">
+        <meta name="author" content="">
+        
+        <title>{% block title %}{% endblock %}</title>
+
+        <link href="https://fonts.googleapis.com/css?family=Roboto:100,100i,300,300i,400,400i,500,500i,700,700i,900,900i&amp;subset=cyrillic,latin-ext" rel="stylesheet">
+        <link href="{% sass_src 'core/css/bootstrap/bootstrap.scss' %}" rel="stylesheet" type="text/css" />
+        <link href="{% sass_src 'core/css/style.scss' %}" rel="stylesheet" type="text/css" />
+
+        <script src="{% static 'core/js/jquery-3.3.1.min.js' %}"></script>
+        <script src="{% static 'core/js/bootstrap.min.js' %}"></script>
+    </head>
+
+    <body>
+        {% include 'core/_nav.html' %}
+
+        {% block body %}{% endblock %}
+
+        <div class="container-fluid footer">
+            <i>Page generated in 123ms</i>
+        </div>
+    </body>
+</html>
