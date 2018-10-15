@@ -4,8 +4,6 @@ services:
   parser:
     build: .
     command: "python -m celery worker -A app -Q parse_killmail -c 40"
-    volumes:
-      - ".:/app"
     depends_on:
       - postgres
       - rabbit
@@ -14,24 +12,41 @@ services:
   hydrate:
     build: .
     command: "python -m celery worker -A app -Q hydrate_character,hydrate_corporation,hydrate_alliance -c 32"
-    volumes:
-      - ".:/app"
     depends_on:
       - postgres
       - rabbit
       - redis
 
+  frontend:
+    build: .
+    working_dir: "/app/frontend"
+    command: "./entrypoint.sh"
+    ports:
+      - "6868:80"
+    volumes:
+      - "static:/app/static"
+    depends_on:
+      - postgres
+      - redis
+      - backend      
 
-  backend_api:
+  backend:
     build: .
     command: "gunicorn backend:app -w 4 -b 0.0.0.0:80"
     ports:
       - "6767:80"
-    volumes:
-      - ".:/app"
     depends_on:
       - postgres
 
+  nginx:
+    build: nginx/
+    ports: 
+      - "6969:80"
+    volumes:
+      - "static:/static"
+    depends_on:
+      - frontend
+      - backend
 
   rabbit:
     image: rabbitmq:3.7-management
@@ -66,3 +81,4 @@ volumes:
   pg_data:
   redis_data:
   rabbit_data:
+  static:
