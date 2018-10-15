@@ -18,5 +18,6 @@ from django.urls import path
 from core import views as core
 
 urlpatterns = [
-    path('styling/', core.styling, name="styling")
+    path('styling/', core.styling, name="styling"),
+    path('styling2/', core.styling2, name="styling2"),
 ]

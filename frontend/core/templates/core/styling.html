@@ -1,13 +1,14 @@
 {% extends "core/base.html" %}
 
+{% load staticfiles %}
+
 {% block title %}Styling Test{% endblock %}
 
 
 {% block body %}
-<div class="container-fluid ship-bg"></div>
-
 <div class="container">
-    <div class="jumbotron dark-transparent">
+    <br />
+    <div class="jumbotron light-transparent">
         <h1 class="display-3">A big <i>header</i></h1>
 
         <h1>Header 1</h1>
@@ -29,35 +30,35 @@
         </p>
 
         <div class="row">
-            {% with "3514 42125 671 23773" as ships %}
+            {% with "3514 42125 3764 23773" as ships %}
                 {% for ship in ships.split %}
-                    <div class="col-3">
+                    <div class="col-xl-3 col-lg-4 col-md-6">
                         <div class="card card-killmail border-dark" style="background-image: url('https://imageserver.eveonline.com/Render/{{ ship }}_512.png');">
                             <div class="card-header">
                                 <img class="avatar" src="https://imageserver.eveonline.com/Character/93417038_64.jpg">
                                 <div class="victim-details">
-                                    <strong><a href="#">Capri Sun KraftFoods</a></strong><br />
-                                    <i>Revenant</i>
+                                    <a href="#"><strong>Capri Sun KraftFoods</strong></a><br />
+                                    <a href="#"><i>Revenant</i></a>
                                 </div>
                             </div>
                             <div class="victim-avatars">
-                                <img class="avatar" src="https://imageserver.eveonline.com/Corporation/98040755_64.png">
-                                <img class="avatar" src="https://imageserver.eveonline.com/Alliance/99005065_64.png">
+                                <a href="#"><img class="avatar" src="https://imageserver.eveonline.com/Corporation/98040755_64.png"></a>
+                                <a href="#"><img class="avatar" src="https://imageserver.eveonline.com/Alliance/99005065_64.png"></a>
                             </div>
 
                             <div class="killmail-details">
-                                <img class="avatar" src="https://imageserver.eveonline.com/Corporation/98115742_64.png">
-                                <img class="avatar" src="https://imageserver.eveonline.com/Alliance/864733958_64.png">
+                                <a href="#"><img class="avatar" src="https://imageserver.eveonline.com/Corporation/98115742_64.png"></a>
+                                <a href="#"><img class="avatar" src="https://imageserver.eveonline.com/Alliance/864733958_64.png"></a>
                                 <ul>
                                     <li>128.49B ISK</li>
                                     <li>48 Attackers</li>
                                 </ul>
                             </div>
                             <div class="killmail-footer">
-                                <img class="avatar" src="https://imageserver.eveonline.com/Character/94726691_64.jpg">
+                                <a href="#"><img class="avatar" src="https://imageserver.eveonline.com/Character/94726691_64.jpg"></a>
                                 <div class="final-blow-details">
-                                    <strong>Capri Sun SUPERFOODS</strong><br />
-                                    <i>Revelation</i>
+                                    <a href="#"><strong>Capri Sun SUPERFOODS</strong></a><br />
+                                    <a href="#"><i>Revelation</i></a>
                                 </div>
                             </div>
                         </div>
@@ -70,7 +71,10 @@
     <table class="table table-sm table-borderless table-striped killmail-table">
         <thead>
             <tr>
-
+                <th>When</th>
+                <th colspan="2">Where</th>
+                <th colspan="2">Victim</th>
+                <th colspan="2">Final Blow</th>
             </tr>
         </thead>
         <tbody>
@@ -110,5 +114,50 @@
             {% endwith %}
         </tbody>
     </table>
+
+    <div class="row">
+        <div class="col-9">
+            <div class="fitting" style="background-image: url(https://imageserver.eveonline.com/Render/3764_512.png);">
+                <div class="circle"></div>
+
+                <img class="high-1-frames" src="{% static 'core/img/fitting/high-1-frame.png' %}">
+                <img class="high high-1" src="https://imageserver.eveonline.com/Type/37294_64.png">
+                <img class="high-2-frames" src="{% static 'core/img/fitting/high-2-frame.png' %}">
+                <img class="high high-2" src="https://imageserver.eveonline.com/Type/37294_64.png">
+                <img class="high-3-frames" src="{% static 'core/img/fitting/high-3-frame.png' %}">
+                <img class="high high-3" src="https://imageserver.eveonline.com/Type/37294_64.png">
+                <img class="high-4-frames" src="{% static 'core/img/fitting/high-4-frame.png' %}">
+                <div class="high high-4"></div>
+                <img class="high-5-frames" src="{% static 'core/img/fitting/high-5-frame.png' %}">
+                <img class="high high-5" src="https://imageserver.eveonline.com/Type/37294_64.png">
+                <img class="high-6-frames" src="{% static 'core/img/fitting/high-6-frame.png' %}">
+                <img class="high high-6" src="https://imageserver.eveonline.com/Type/37294_64.png">
+                <img class="high-7-frames" src="{% static 'core/img/fitting/high-7-frame.png' %}">
+                <img class="high high-7" src="https://imageserver.eveonline.com/Type/37294_64.png">
+                <img class="high-8-frames" src="{% static 'core/img/fitting/high-8-frame.png' %}">
+                <div class="high high-8"></div>
+
+                <img class="mid-1-frames" src="{% static 'core/img/fitting/mid-1-frame.png' %}">
+                <img class="mid mid-1" src="https://imageserver.eveonline.com/Type/47408_64.png">
+                <img class="mid-2-frames" src="{% static 'core/img/fitting/mid-2-frame.png' %}">
+                <img class="mid mid-2" src="https://imageserver.eveonline.com/Type/47408_64.png">
+                <img class="mid-3-frames" src="{% static 'core/img/fitting/mid-3-frame.png' %}">
+                <img class="mid mid-3" src="https://imageserver.eveonline.com/Type/47408_64.png">
+                <img class="mid-4-frames" src="{% static 'core/img/fitting/mid-4-frame.png' %}">
+                <div class="mid mid-4"></div>
+                <img class="mid-5-frames" src="{% static 'core/img/fitting/mid-5-frame.png' %}">
+                <img class="mid mid-5" src="https://imageserver.eveonline.com/Type/47408_64.png">
+                <img class="mid-6-frames" src="{% static 'core/img/fitting/mid-6-frame.png' %}">
+                <img class="mid mid-6" src="https://imageserver.eveonline.com/Type/47408_64.png">
+                <img class="mid-7-frames" src="{% static 'core/img/fitting/mid-7-frame.png' %}">
+                <div class="mid mid-7"></div>
+                <img class="mid-8-frames" src="{% static 'core/img/fitting/mid-8-frame.png' %}">
+                <img class="mid mid-8" src="https://imageserver.eveonline.com/Type/47408_64.png">
+
+                <img class="low-1-frames" src="{% static 'core/img/fitting/low-1-frame.png' %}">
+                <img class="low low-1" src="https://imageserver.eveonline.com/Type/47408_64.png">
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}

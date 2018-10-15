@@ -78,7 +78,7 @@ STATICFILES_FINDERS = [
 ]
 
 SASS_PRECISION = 8
-SASS_OUTPUT_STYLE = 'compact'
+SASS_OUTPUT_STYLE = 'compressed'
 
 WSGI_APPLICATION = 'frontend.wsgi.application'
 

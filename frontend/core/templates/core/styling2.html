@@ -1,0 +1,62 @@
+{% extends "core/base.html" %}
+
+{% load staticfiles %}
+
+{% block title %}Styling Test 2{% endblock %}
+
+
+{% block body %}
+<div class="container group">
+    <br />
+
+    <div class="jumbotron dark-transparent">
+        <div class="summary">
+            <div class="row">
+                <div class="col-7">
+                    <img class="avatar" src="https://imageserver.eveonline.com/Alliance/99005065_128.png">
+                    <h2>Hard Knocks Citizens [HKRAB]</h2>
+                    <ul class="list-unstyled">
+                        <li><strong>Executor:</strong> Hard Knocks Inc.</li>
+                        <li><strong>Members:</strong> 1,550</li>
+                        <li><strong>Corporations:</strong> 23</li>
+                    </ul>
+                </div>
+                <div class="col-5">
+                    <nav class="nav flex-column">
+                        <a class="nav-link active" href="#">Active</a>
+                        <a class="nav-link" href="#">Link</a>
+                        <a class="nav-link" href="#">Link</a>
+                        <a class="nav-link disabled" href="#">Disabled</a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-9"></div>
+
+        <div class="col-md-3">
+            <div class="box dark-transparent listing">
+                <h5>Top Characters</h5>
+                {% for id, name in characters %}
+                    <div class="picture-item character" style="background-image: url('https://imageserver.eveonline.com/Character/{{ id }}_512.jpg');">
+                        <strong>{{ name }}</strong>
+                        <div>13 / 5</div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="box dark-transparent listing">
+                <h5>Top Ships</h5>
+                {% for id, name in ships %}
+                    <div class="picture-item ship" style="background-image: url('https://imageserver.eveonline.com/Render/{{ id }}_512.png');">
+                        <strong>{{ name }}</strong>
+                        <div>13 / 5</div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

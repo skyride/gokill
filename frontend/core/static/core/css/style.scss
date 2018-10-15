@@ -26,23 +26,45 @@ $sec-0-0:   #F00000;
 .sec-0-0 { color: $sec-0-0; }
 
 .ship-bg {
-    background-image: url("/static/core/img/ships_abstract_3.png");
+    position: absolute;
+    background-size: 100%;
+    width: 100%;
     height: 700px;
-    margin-bottom: -600px;
+    background-repeat: no-repeat;
+    z-index: -5;
 }
+
+.ship-bg-1 { background-image: url("/static/core/img/ships_abstract_1.png"); }
+.ship-bg-2 { background-image: url("/static/core/img/ships_abstract_2.png"); }
+.ship-bg-3 { background-image: url("/static/core/img/ships_abstract_3.png"); }
 
 .navbar {
     background-color: rgba(0, 0, 0, 0.0) !important;
-    margin-bottom: -56px;
+}
+
+.box {
+    width: 100%;
+    padding: 8px;
+    border-radius: 3px;
+}
+
+.light-transparent {
+    background-color: transparentize(#0C1A21, 0.65);
+    color: $light;
 }
 
 .dark-transparent {
-    background-color: transparentize(#0C1A21, 0.65);
+    background-color: transparentize(#0C1A21, 0.4);
     color: $light;
 }
 
 .card-killmail {
     background-size: 100%;
+    margin-bottom: 7px;
+
+    a {
+        color: $light;
+    }
 
     .avatar {
         float: left;
@@ -52,8 +74,9 @@ $sec-0-0:   #F00000;
     }
 
     .card-header {
-        background-color: rgba(#0C1A21, 0.65);
+        background-color: rgba(#0C1A21, 0.4);
         padding: 7px 10px;
+        border-bottom: 0px;
 
         .victim-details {
             float: left;
@@ -70,21 +93,22 @@ $sec-0-0:   #F00000;
     }
 
     .killmail-details {
-        padding: 3px 10px;
+        padding: 0px 0px 0px 10px;
 
         ul {
             float: right;
             text-align: right;
-            padding-left: 0;
+            padding: 3px 10px 0px 7px;
+            border-radius: 18px 0px 0px 0px;
             margin-bottom: 0;
             list-style: none;
+            background-color: rgba(#0C1A21, 0.35);
         }
     }
 
     .killmail-footer {
         background-color: rgba(#0C1A21, 0.35);
         padding: 7px 10px;
-        border-top: 1px solid rgba(0, 0, 0, 0.125);
 
         .avatar {
             float: right;
@@ -119,7 +143,207 @@ $sec-0-0:   #F00000;
     padding-top: 8px;
     margin-top: 40px;
     min-height: 35px;
-    background-color: $gray-300;
-    color: $gray-500;
+    background-color: $gray-600;
+    color: $gray-700;
     text-align: center;
+}
+
+.fitting {
+    width: 384px;
+    height: 384px;
+    background-size: 100%;
+    border-radius: 50%;
+    position: relative;
+    //border: 1px $dark solid;
+
+    .circle {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background-image: url("/static/core/img/fitting/fittingcircle.png");
+        background-repeat: no-repeat;
+        z-index: 3;
+    }
+
+    img.high, img.mid, img.low, div.high, div.mid, div.low {
+        width: 32px;
+        height: 32px;
+    }
+
+    img, div {
+        position: absolute;
+        z-index: 5;
+    }
+
+    .high {
+        background-image: url("/static/core/img/fitting/filterIconHighSlot.png");
+        background-size: 100%;
+    }
+
+    .high-1-frames {
+        left: 61px;
+        top: 34px;
+    }
+    .high-1 {
+        left: 73px;
+        top: 47px;
+    }
+    .high-2-frames {
+        left: 91px;
+        top: 15px;
+    }
+    .high-2 {
+        left: 98px;
+        top: 26px;
+    }
+    .high-3-frames {
+        left: 123px;
+        top: 4px;
+    }
+    .high-3 {
+        left: 128px;
+        top: 12px;
+    }
+    .high-4-frames {
+        left: 160px;
+        top: 1px;
+    }
+    .high-4 {
+        left: 163px;
+        top: 5px;
+    }
+    .high-5-frames {
+        left: 196px;
+        top: 1px;
+    }
+    .high-5 {
+        left: 199px;
+        top: 6px;
+    }
+    .high-6-frames {
+        left: 227px;
+        top: 7px;
+    }
+    .high-6 {
+        left: 234px;
+        top: 15px;
+    }
+    .high-7-frames {
+        left: 258px;
+        top: 22px;
+    }
+    .high-7 {
+        left: 267px;
+        top: 31px;
+    }
+    .high-8-frames {
+        left: 285px;
+        top: 44px;
+    }
+    .high-8 {
+        left: 295px;
+        top: 52px;
+    }
+
+    .mid {
+        background-image: url("/static/core/img/fitting/filterIconMediumSlot.png");
+        background-size: 100%;
+    }
+
+    .mid-1-frames {
+        left: 309px;
+        top: 75px;
+    }
+    .mid-1 {
+        left: 320px;
+        top: 85px;
+    }
+    .mid-2-frames {
+        left: 326px;
+        top: 108px;
+    }
+    .mid-2 {
+        left: 336px;
+        top: 117px;
+    }
+    .mid-3-frames {
+        left: 337px;
+        top: 145px;
+    }
+    .mid-3 {
+        left: 345px;
+        top: 151px;
+    }
+    .mid-4-frames {
+        left: 340px;
+        top: 184px;
+    }
+    .mid-4 {
+        left: 346px;
+        top: 187px;
+    }
+    .mid-5-frames {
+        left: 331px;
+        top: 215px;
+    }
+    .mid-5 {
+        left: 340px;
+        top: 221px;
+    }
+    .mid-6-frames {
+        left: 317px;
+        top: 246px;
+    }
+    .mid-6 {
+        left: 328px;
+        top: 254px;
+    }
+    .mid-7-frames {
+        left: 298px;
+        top: 273px;
+    }
+    .mid-7 {
+        left: 308px;
+        top: 284px;
+    }
+    .mid-8-frames {
+        left: 274px;
+        top: 298px;
+    }
+    .mid-8 {
+        left: 283px;
+        top: 309px;
+    }
+
+    .low {
+        background-image: url("/static/core/img/fitting/filterIconLowSlot.png");
+        background-size: 100%;
+    }
+}
+
+.group {
+    .summary {
+        text-shadow: 1px 1px #131313;
+        .avatar, h1 {
+            float: left;
+        }
+
+        .avatar {
+            margin-right: 20px;
+        }
+    }
+
+    .listing {
+        margin-bottom: 13px;
+        text-shadow: 1px 1px #131313;
+
+        .picture-item {
+            background-size: 100%;
+            background-position-y: 50%;
+            background-repeat: no-repeat;
+            min-height: 65px;
+            padding: 6px 10px;
+            border-radius: 3px;
+        }
+    }
 }
